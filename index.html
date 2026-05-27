@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>笨蛋受害者联盟</title>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Vue 3 -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
@@ -93,22 +89,30 @@
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
         }
 
-        /* 纯净全屏右贴边遮罩：无色块，左侧平滑淡出 */
+        /* 纯净全屏右贴边遮罩：移动端从底部和左侧增加淡出，防止遮挡文字 */
         .fullscreen-portrait-mask {
-            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%), 
-                                linear-gradient(to right, transparent 0%, black 40%);
-            mask-image: linear-gradient(to bottom, black 70%, transparent 100%), 
-                        linear-gradient(to right, transparent 0%, black 40%);
+            -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%), 
+                                linear-gradient(to right, transparent 0%, black 30%);
+            mask-image: linear-gradient(to bottom, black 65%, transparent 100%), 
+                        linear-gradient(to right, transparent 0%, black 30%);
             -webkit-mask-composite: source-in;
             mask-composite: intersect;
         }
+        @media (min-width: 768px) {
+            .fullscreen-portrait-mask {
+                -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%), 
+                                    linear-gradient(to right, transparent 0%, black 40%);
+                mask-image: linear-gradient(to bottom, black 70%, transparent 100%), 
+                            linear-gradient(to right, transparent 0%, black 40%);
+            }
+        }
 
-        /* 详情页立绘遮罩 */
+        /* 详情页立绘遮罩：全端右贴边适配 */
         .detail-portrait-mask {
             -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%), 
-                                linear-gradient(to left, black 80%, transparent 100%);
+                                linear-gradient(to right, transparent 0%, black 40%);
             mask-image: linear-gradient(to bottom, black 75%, transparent 100%), 
-                        mask-image: linear-gradient(to left, black 80%, transparent 100%);
+                        linear-gradient(to right, transparent 0%, black 40%);
             -webkit-mask-composite: source-in;
             mask-composite: intersect;
         }
@@ -117,7 +121,6 @@
 <body>
     <div id="app" class="min-h-screen bg-editorial-bg text-editorial-text font-sans selection:bg-editorial-accent selection:text-editorial-bg flex flex-col">
         
-        <!-- Background Atmosphere -->
         <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
             <div 
                 class="absolute -top-[10%] -left-[10%] w-[80%] md:w-[60%] h-[60%] rounded-full opacity-10 blur-[150px] transition-all duration-1000"
@@ -125,26 +128,23 @@
             ></div>
         </div>
 
-        <!-- ─── 首页：全屏图片绝对右贴边且无左侧色块 ─── -->
-        <div v-if="view === 'home'" class="absolute top-0 right-0 bottom-0 w-[100vw] z-1 pointer-events-none overflow-hidden hidden md:block">
+        <div v-if="view === 'home'" class="absolute top-0 right-0 bottom-0 w-[100vw] z-1 pointer-events-none overflow-hidden">
             <transition name="scale-fade" mode="out-in">
                 <div :key="selectedCharacter.id" class="absolute inset-0">
-                    <!-- 左侧平滑融入背景的纯净遮罩，不含任何色块 -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-editorial-bg via-transparent to-transparent z-10"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-editorial-bg via-editorial-bg/30 md:via-transparent to-transparent z-10"></div>
                     <img 
                         :src="selectedCharacter.portrait" 
                         :alt="selectedCharacter.name" 
                         referrerpolicy="no-referrer" 
-                        class="w-full h-full object-cover object-right-top fullscreen-portrait-mask opacity-85" 
+                        class="w-full h-full object-cover fullscreen-portrait-mask  md:opacity-85" 
+						style="object-position: 70%;"
                     />
                 </div>
             </transition>
         </div>
 
         <transition name="page" mode="out-in">
-            <!-- MAIN SHOWCASE PAGE -->
             <div v-if="view === 'home'" key="home" class="flex-grow flex flex-col p-6 md:p-10 relative z-10 justify-between">
-                <!-- Header -->
                 <header class="relative z-20 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-editorial-accent/20 pb-5 gap-4">
                     <div>
                         <h1 class="text-xl md:text-2xl font-serif tracking-[0.2em] uppercase text-editorial-accent">Ethereal Bonds</h1>
@@ -153,7 +153,6 @@
                         </div>
                     </div>
 
-                    <!-- Search Bar -->
                     <div class="relative w-full md:w-64">
                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-editorial-accent/50"></i>
                         <input 
@@ -179,10 +178,8 @@
                     </div>
                 </header>
 
-                <!-- Main Showcase -->
                 <main class="relative z-10 flex-grow grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-10 items-center py-6">
-                    <!-- Character Info -->
-                    <div class="relative z-10">
+                    <div class="relative z-10 bg-editorial-bg/60 backdrop-blur-md md:bg-transparent md:backdrop-blur-none p-5 rounded-2xl border border-white/5 md:border-0">
                         <transition name="fade-slide" mode="out-in">
                             <div :key="selectedCharacter.id" class="relative">
                                 <div class="absolute -top-10 -left-4 font-serif text-[60px] md:text-[100px] italic text-editorial-accent/5 leading-none select-none">
@@ -222,7 +219,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- ENTER DETAIL BUTTON -->
                                     <button 
                                         @click="view = 'detail'"
                                         class="group flex items-center gap-3 px-6 py-3 bg-editorial-accent text-editorial-bg rounded-full text-[10px] font-bold tracking-[0.2em] hover:scale-105 transition-all duration-300"
@@ -235,19 +231,9 @@
                         </transition>
                     </div>
 
-                    <!-- 移动端独立显眼立绘容器 -->
-                    <div class="relative h-[320px] flex justify-center items-center md:hidden py-2">
-                        <transition name="scale-fade" mode="out-in">
-                            <div :key="selectedCharacter.id" class="relative w-[200px] h-full bg-gradient-to-b from-[#1a1a1f] to-[#2a2a35] rounded-[100px_100px_20px_20px] border border-editorial-accent/30 overflow-hidden">
-                                <img :src="selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover" />
-                                <div class="absolute inset-x-0 bottom-0 h-[100px] bg-gradient-to-t from-editorial-bg to-transparent z-20"></div>
-                            </div>
-                        </transition>
-                    </div>
                     <div></div>
                 </main>
 
-                <!-- Selection Grid -->
                 <footer class="relative z-10 flex gap-3 pt-5 border-t border-white/5 overflow-x-auto pb-2 custom-scrollbar">
                     <button
                         v-for="(char, index) in characters"
@@ -261,9 +247,7 @@
                 </footer>
             </div>
 
-            <!-- CHARACTER DETAIL PAGE -->
             <div v-else key="detail" class="flex-grow flex flex-col relative z-10 overflow-y-auto max-h-screen">
-                <!-- Detail Header -->
                 <nav class="sticky top-0 z-30 flex justify-between items-center p-6 md:p-10 bg-editorial-bg/90 backdrop-blur-md border-b border-white/5">
                     <button @click="view = 'home'" class="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-editorial-accent hover:opacity-70 transition-opacity">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
@@ -274,16 +258,13 @@
                     </div>
                 </nav>
 
-                <!-- 详情页左侧立绘 -->
-                <div class="absolute top-24 left-0 w-full lg:w-[100vw] h-[calc(100vh-6rem)] pointer-events-none hidden lg:block overflow-hidden">
-                    <img :src="selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover object-top detail-portrait-mask opacity-50" />
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent to-editorial-bg z-10"></div>
+                <div class="absolute top-24 right-0 w-full lg:w-[100vw] h-[calc(100vh-6rem)] pointer-events-none overflow-hidden">
+                    <img :src="selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover object-right-top detail-portrait-mask opacity-30 lg:opacity-50" />
+                    <div class="absolute inset-0 bg-gradient-to-r from-editorial-bg via-transparent to-transparent z-10"></div>
                 </div>
 
-                <!-- 详情页内容主区域：优化宽度和响应式，彻底解决显示不全 -->
-                <div class="w-full max-w-7xl mx-auto p-6  relative z-20 box-border">
-                    <div class="flex flex-col gap-12 w-full">
-                        <!-- Identity -->
+                <div class="w-full max-w-7xl mx-auto p-6 relative z-20 box-border">
+                    <div class="flex flex-col gap-12 w-full  backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none p-5 lg:p-0 rounded-2xl border border-white/5 lg:border-0">
                         <section class="w-full">
                             <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-4 uppercase">Identity Record</div>
                             <h1 class="text-5xl md:text-8xl font-serif font-bold tracking-tight leading-none mb-4 uppercase break-words">{{ selectedCharacter.name }}</h1>
@@ -296,12 +277,6 @@
                             </div>
                         </section>
 
-                        <!-- 移动端补充图 -->
-                        <div class="w-full aspect-[4/5] rounded-xl overflow-hidden block lg:hidden border border-white/10">
-                            <img :src="selectedCharacter.portrait" class="w-full h-full object-cover object-top" />
-                        </div>
-
-                        <!-- Background Narrative -->
                         <section class="border-t border-white/5 pt-12 w-full">
                             <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Background Narrative</div>
                             <div class="prose prose-invert max-w-none w-full">
@@ -315,7 +290,6 @@
                             </div>
                         </section>
 
-                        <!-- Voice Resonance 组件：全自适应排版，杜绝溢出截断 -->
                         <section class="border-t border-white/5 pt-12 w-full">
                             <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Voice Resonance</div>
                             <div class="bg-white/5 rounded-2xl p-5 md:p-8 border border-white/5 w-full box-border">
@@ -337,7 +311,6 @@
                             </div>
                         </section>
 
-                        <!-- Tactical Analysis -->
                         <section class="border-t border-white/5 pt-12 pb-20 w-full">
                             <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Tactical Analysis</div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
@@ -363,7 +336,7 @@
             { id: '2', name: '月白白', nameJp: 'カエレン・ブレイズ', title: 'Guardian of the Eternal Flame', description: '作为星辰教团的首席执政官，他背负着不可告人的禁忌。严谨的外表下隐藏着对自由的渴望。在命运的交织中，他是你最可靠的盟友，亦或是最危险的博弈者。拥有操控光影的异能，其声音如深秋寒蝉，冷冽而悠长。', portrait: './img/baibai.jpg', voiceLine: 'My blade is yours, as long as your heart remains true.', color: '#ef4444', traits: ['Stoic', 'Loyal', 'Powerful'] },
             { id: '3', name: '夏销雪', nameJp: 'ライラ・スター', title: 'Starlight Weaver', description: '作为星辰教团的首席执政官，他背负着不可告人的禁忌。严谨的外表下隐藏着对自由的渴望。在命运的交织中，他是你最可靠的盟友，亦或是最危险的博弈者。拥有操控光影的异能，其声音如深秋寒蝉，冷冽而悠长。', portrait: 'https://picsum.photos/seed/lyra/800/1200', voiceLine: 'The stars have told me much about you, traveler.', color: '#8b5cf6', traits: ['Mysterious', 'Wise', 'Dreamy'] },
             { id: '4', name: '玖玥珩', nameJp: 'ソーン・シャドウ', title: 'The Shadow Blade', description: '作为星辰教团的首席执政官，他背负着不可告人的禁忌。严谨的外表下隐藏着对自由的渴望。在命运的交织中，他是你最可靠的盟友，亦或是最危险的博弈者。拥有操控光影的异能，其声音如深秋寒蝉，冷冽而悠长。', portrait: 'https://picsum.photos/seed/thorne/800/1200', voiceLine: 'Don\'t blink. You might miss the end of your story.', color: '#1f2937', traits: ['Cunning', 'Lone Wolf', 'Agile'] },
-            { id: '5', name: '鲨辣辣', nameJp: 'エロウェン・ムーン', title: 'Priestess of the Silver Moon', description: '作为星辰教团的首席执政官，他背负着不可告人的禁忌。严谨的外表下隐藏着对自由的渴望。在命运的交织中，他是你最可靠的盟友，亦或是最危险的博弈者。拥有操控光影的异能，其声音如深秋寒蝉，冷冽而悠长。', portrait: 'https://picsum.photos/seed/elowen/800/1200', voiceLine: 'May the moon\'s light guide your path through the darkness.', color: '#94a3b8', traits: ['Compassionate', 'Serene', 'Healer'] },
+            { id: '5', name: '鲨辣辣', nameJp: 'エロウェン・ムーン', title: 'Priestess of the Silver Moon', description: '作为星辰教团的首席执政官，他背负着不可告人的禁忌。严谨的外表下隐藏着对自由的渴望。在命运的交织中，他是你最可靠的盟友，亦或是最危险的博弈者。拥有操控光影的异能，其声音如深秋寒蝉，冷冽而悠长。', portrait: './img/shasha.jpg', voiceLine: 'May the moon\'s light guide your path through the darkness.', color: '#94a3b8', traits: ['Compassionate', 'Serene', 'Healer'] },
             { id: '6', name: '利威尔', nameJp: 'イグニス・フレイム', title: 'The Crimson Alchemist', description: '作为星辰教团的首席执政官，他背负着不可告人的禁忌。严谨的外表下隐藏着对自由的渴望。在命运的交织中，他是你最可靠的盟友，亦或是最危险的博弈者。拥有操控光影的异能，其声音如深秋寒蝉，冷冽而悠长。', portrait: 'https://picsum.photos/seed/ignis/800/1200', voiceLine: 'Everything has a price. Are you willing to pay it?', color: '#f97316', traits: ['Brilliant', 'Volatile', 'Ambitious'] },
             { id: '7', name: '尉云舒', nameJp: 'セラフィナ・エンジェル', title: 'The Fallen Angel', description: '作为星辰教团的首席执政官，他背负着不可告人的禁忌。严谨的外表下隐藏着对自由的渴望。在命运的交织中，他是你最可靠的盟友，亦或是最危险的博弈者。拥有操控光影的异能，其声音如深秋寒蝉，冷冽而悠长。', portrait: 'https://picsum.photos/seed/seraphina/800/1200', voiceLine: 'I have seen the heavens fall. Earth is... quieter.', color: '#fbbf24', traits: ['Melancholy', 'Noble', 'Resilient'] },
             { id: '8', name: '林愫', nameJp: 'ダンテ・ポエット', title: 'The Cursed Poet', description: '作为星辰教团的首席执政官，他背负着不可告人的禁忌。严谨的外表下隐藏着对自由的渴望。在命运的交织中，他是你最可靠的盟友，亦或是最危险的博弈者。拥有操控光影的异能，其声音如深秋寒蝉，冷冽而悠长。', portrait: 'https://picsum.photos/seed/dante/800/1200', voiceLine: 'A single verse can change the world. Or end it.', color: '#7c3aed', traits: ['Creative', 'Fragile', 'Deep'] },
