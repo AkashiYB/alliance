@@ -67,8 +67,8 @@
         .scale-fade-enter-active, .scale-fade-leave-active {
             transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        .scale-fade-enter-from { opacity: 0; transform: scale(0.95); }
-        .scale-fade-leave-to { opacity: 0; transform: scale(1.05); }
+        .scale-fade-enter-from { opacity: 0; transform: scale(1.02); filter: blur(10px); }
+        .scale-fade-leave-to { opacity: 0; transform: scale(0.98); filter: blur(10px); }
 
         /* Full Page Detail Transition */
         .page-enter-active, .page-leave-active {
@@ -93,10 +93,24 @@
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
         }
 
-        /* Portrait Mask for Detail Page */
+        /* 纯净全屏右贴边遮罩：无色块，左侧平滑淡出 */
+        .fullscreen-portrait-mask {
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%), 
+                                linear-gradient(to right, transparent 0%, black 40%);
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%), 
+                        linear-gradient(to right, transparent 0%, black 40%);
+            -webkit-mask-composite: source-in;
+            mask-composite: intersect;
+        }
+
+        /* 详情页立绘遮罩 */
         .detail-portrait-mask {
-            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%), 
+                                linear-gradient(to left, black 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 75%, transparent 100%), 
+                        mask-image: linear-gradient(to left, black 80%, transparent 100%);
+            -webkit-mask-composite: source-in;
+            mask-composite: intersect;
         }
     </style>
 </head>
@@ -106,16 +120,32 @@
         <!-- Background Atmosphere -->
         <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
             <div 
-                class="absolute -top-[10%] -left-[10%] w-[80%] md:w-[60%] h-[60%] rounded-full opacity-5 blur-[120px] transition-all duration-1000"
+                class="absolute -top-[10%] -left-[10%] w-[80%] md:w-[60%] h-[60%] rounded-full opacity-10 blur-[150px] transition-all duration-1000"
                 :style="{ backgroundColor: selectedCharacter.color }"
             ></div>
         </div>
 
+        <!-- ─── 首页：全屏图片绝对右贴边且无左侧色块 ─── -->
+        <div v-if="view === 'home'" class="absolute top-0 right-0 bottom-0 w-[100vw] z-1 pointer-events-none overflow-hidden hidden md:block">
+            <transition name="scale-fade" mode="out-in">
+                <div :key="selectedCharacter.id" class="absolute inset-0">
+                    <!-- 左侧平滑融入背景的纯净遮罩，不含任何色块 -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-editorial-bg via-transparent to-transparent z-10"></div>
+                    <img 
+                        :src="selectedCharacter.portrait" 
+                        :alt="selectedCharacter.name" 
+                        referrerpolicy="no-referrer" 
+                        class="w-full h-full object-cover object-right-top fullscreen-portrait-mask opacity-85" 
+                    />
+                </div>
+            </transition>
+        </div>
+
         <transition name="page" mode="out-in">
             <!-- MAIN SHOWCASE PAGE -->
-            <div v-if="view === 'home'" key="home" class="flex-grow flex flex-col p-6 md:p-10 relative z-10">
+            <div v-if="view === 'home'" key="home" class="flex-grow flex flex-col p-6 md:p-10 relative z-10 justify-between">
                 <!-- Header -->
-                <header class="relative z-20 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-editorial-accent/20 pb-5 mb-8 gap-4">
+                <header class="relative z-20 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-editorial-accent/20 pb-5 gap-4">
                     <div>
                         <h1 class="text-xl md:text-2xl font-serif tracking-[0.2em] uppercase text-editorial-accent">Ethereal Bonds</h1>
                         <div class="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-editorial-dim mt-1">
@@ -150,25 +180,25 @@
                 </header>
 
                 <!-- Main Showcase -->
-                <main class="relative z-10 flex-grow grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-10 items-center">
+                <main class="relative z-10 flex-grow grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-10 items-center py-6">
                     <!-- Character Info -->
-                    <div class="relative z-10 order-2 md:order-1">
+                    <div class="relative z-10">
                         <transition name="fade-slide" mode="out-in">
                             <div :key="selectedCharacter.id" class="relative">
-                                <div class="absolute -top-10 -left-4 font-serif text-[60px] md:text-[80px] italic text-editorial-accent/10 leading-none select-none">
+                                <div class="absolute -top-10 -left-4 font-serif text-[60px] md:text-[100px] italic text-editorial-accent/5 leading-none select-none">
                                     {{ selectedCharacter.id.padStart(2, '0') }}
                                 </div>
                                 
                                 <div class="mb-6 relative z-10">
-                                    <h2 class="text-4xl md:text-7xl font-serif font-bold tracking-tight leading-none mb-2 uppercase">
+                                    <h2 class="text-4xl md:text-8xl font-serif font-bold tracking-tight leading-none mb-3 uppercase">
                                         {{ selectedCharacter.name }}
                                     </h2>
-                                    <p class="text-base md:text-lg text-editorial-accent tracking-[0.3em] uppercase font-sans">
+                                    <p class="text-base md:text-xl text-editorial-accent tracking-[0.3em] uppercase font-sans">
                                         {{ selectedCharacter.nameJp }}
                                     </p>
                                 </div>
 
-                                <p class="text-xs md:text-sm text-editorial-dim leading-relaxed font-sans mb-8 max-w-md text-justify">
+                                <p class="text-xs md:text-sm text-editorial-dim leading-relaxed font-sans mb-10 max-w-xl text-justify">
                                     {{ selectedCharacter.description }}
                                 </p>
 
@@ -205,24 +235,20 @@
                         </transition>
                     </div>
 
-                    <!-- Character Art -->
-                    <div class="relative h-full flex justify-center items-center order-1 md:order-2 py-8 md:py-0">
+                    <!-- 移动端独立显眼立绘容器 -->
+                    <div class="relative h-[320px] flex justify-center items-center md:hidden py-2">
                         <transition name="scale-fade" mode="out-in">
-                            <div
-                                :key="selectedCharacter.id"
-                                class="relative w-[240px] h-[400px] md:w-[320px] md:h-[520px] bg-gradient-to-b from-[#1a1a1f] to-[#2a2a35] rounded-[120px_120px_20px_20px] md:rounded-[160px_160px_20px_20px] border border-editorial-accent/30 overflow-hidden"
-                            >
-                                <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(212,175,55,0.1)_0%,transparent_70%)]"></div>
-                                <img :src="selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover relative z-10" />
-                                <div class="absolute inset-x-0 bottom-0 h-[150px] md:h-[200px] bg-gradient-to-t from-editorial-bg to-transparent z-20"></div>
+                            <div :key="selectedCharacter.id" class="relative w-[200px] h-full bg-gradient-to-b from-[#1a1a1f] to-[#2a2a35] rounded-[100px_100px_20px_20px] border border-editorial-accent/30 overflow-hidden">
+                                <img :src="selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover" />
+                                <div class="absolute inset-x-0 bottom-0 h-[100px] bg-gradient-to-t from-editorial-bg to-transparent z-20"></div>
                             </div>
                         </transition>
-                        <div class="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-32 bg-editorial-accent opacity-30"></div>
                     </div>
+                    <div></div>
                 </main>
 
                 <!-- Selection Grid -->
-                <footer class="relative z-10 flex gap-3 mt-8 pt-5 border-t border-white/5 overflow-x-auto pb-4 custom-scrollbar">
+                <footer class="relative z-10 flex gap-3 pt-5 border-t border-white/5 overflow-x-auto pb-2 custom-scrollbar">
                     <button
                         v-for="(char, index) in characters"
                         :key="char.id"
@@ -236,9 +262,9 @@
             </div>
 
             <!-- CHARACTER DETAIL PAGE -->
-            <div v-else key="detail" class="flex-grow flex flex-col relative z-10 overflow-y-auto">
+            <div v-else key="detail" class="flex-grow flex flex-col relative z-10 overflow-y-auto max-h-screen">
                 <!-- Detail Header -->
-                <nav class="sticky top-0 z-30 flex justify-between items-center p-6 md:p-10 bg-editorial-bg/80 backdrop-blur-md border-b border-white/5">
+                <nav class="sticky top-0 z-30 flex justify-between items-center p-6 md:p-10 bg-editorial-bg/90 backdrop-blur-md border-b border-white/5">
                     <button @click="view = 'home'" class="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-editorial-accent hover:opacity-70 transition-opacity">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                         BACK TO ARCHIVE
@@ -248,78 +274,81 @@
                     </div>
                 </nav>
 
-                <div class="max-w-6xl mx-auto w-full p-6 md:p-20">
-                    <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-12 md:gap-24">
-                        <!-- Left: Large Portrait -->
-                        <div class="relative">
-                            <div class="sticky top-32">
-                                <div class="relative aspect-[3/4] rounded-2xl overflow-hidden border border-editorial-accent/20 bg-[#1a1a1f]">
-                                    <img :src="selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover detail-portrait-mask" />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-editorial-bg via-transparent to-transparent opacity-40"></div>
+                <!-- 详情页左侧立绘 -->
+                <div class="absolute top-24 left-0 w-full lg:w-[100vw] h-[calc(100vh-6rem)] pointer-events-none hidden lg:block overflow-hidden">
+                    <img :src="selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover object-top detail-portrait-mask opacity-50" />
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent to-editorial-bg z-10"></div>
+                </div>
+
+                <!-- 详情页内容主区域：优化宽度和响应式，彻底解决显示不全 -->
+                <div class="w-full max-w-7xl mx-auto p-6  relative z-20 box-border">
+                    <div class="flex flex-col gap-12 w-full">
+                        <!-- Identity -->
+                        <section class="w-full">
+                            <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-4 uppercase">Identity Record</div>
+                            <h1 class="text-5xl md:text-8xl font-serif font-bold tracking-tight leading-none mb-4 uppercase break-words">{{ selectedCharacter.name }}</h1>
+                            <p class="text-xl md:text-3xl text-editorial-accent/60 font-serif italic mb-6 break-words">{{ selectedCharacter.nameJp }}</p>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <span v-for="trait in selectedCharacter.traits" :key="trait" class="px-3 py-1 bg-white/5 border border-editorial-accent/20 rounded-full text-[9px] font-bold tracking-widest text-editorial-accent uppercase">
+                                    {{ trait }}
+                                </span>
+                            </div>
+                        </section>
+
+                        <!-- 移动端补充图 -->
+                        <div class="w-full aspect-[4/5] rounded-xl overflow-hidden block lg:hidden border border-white/10">
+                            <img :src="selectedCharacter.portrait" class="w-full h-full object-cover object-top" />
+                        </div>
+
+                        <!-- Background Narrative -->
+                        <section class="border-t border-white/5 pt-12 w-full">
+                            <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Background Narrative</div>
+                            <div class="prose prose-invert max-w-none w-full">
+                                <p class="text-base md:text-xl text-editorial-text/90 leading-relaxed font-sans text-justify break-words">
+                                    {{ selectedCharacter.description }}
+                                </p>
+                                <p class="mt-6 text-editorial-dim text-sm md:text-base leading-relaxed break-words">
+                                    在星辰教团的古老记载中，{{ selectedCharacter.name }} 的存在始终是一个谜。作为 {{ selectedCharacter.title }}，其力量源泉来自于宇宙最深处的共鸣。
+                                    每一次呼吸都仿佛在与虚空对话，每一次行动都牵动着命运的经纬。
+                                </p>
+                            </div>
+                        </section>
+
+                        <!-- Voice Resonance 组件：全自适应排版，杜绝溢出截断 -->
+                        <section class="border-t border-white/5 pt-12 w-full">
+                            <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Voice Resonance</div>
+                            <div class="bg-white/5 rounded-2xl p-5 md:p-8 border border-white/5 w-full box-border">
+                                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 mb-6 w-full">
+                                    <button @click="playVoice" :disabled="isVoicePlaying" class="flex-shrink-0 w-14 h-14 rounded-full bg-editorial-accent text-editorial-bg flex items-center justify-center hover:scale-105 transition-transform">
+                                        <i v-if="!isVoicePlaying" data-lucide="play" class="w-6 h-6 fill-current ml-1"></i>
+                                        <div v-else class="flex gap-1 items-center h-5">
+                                            <div v-for="i in 3" :key="i" class="w-1.5 bg-editorial-bg rounded-full voice-bar" :style="{ animationDelay: (i * 0.1) + 's' }"></div>
+                                        </div>
+                                    </button>
+                                    <div class="min-w-0 flex-grow">
+                                        <div class="text-[10px] font-bold tracking-widest text-editorial-accent uppercase mb-1">Archive Audio</div>
+                                        <div class="text-sm md:text-base italic text-editorial-dim break-words">"{{ selectedCharacter.voiceLine }}"</div>
+                                    </div>
                                 </div>
-                                <!-- Traits -->
-                                <div class="mt-8 flex flex-wrap gap-3">
-                                    <span v-for="trait in selectedCharacter.traits" :key="trait" class="px-4 py-1.5 border border-editorial-accent/20 rounded-full text-[9px] font-bold tracking-widest text-editorial-accent/70 uppercase">
-                                        {{ trait }}
-                                    </span>
+                                <div class="flex items-center gap-1 h-8 px-4 bg-black/20 rounded-lg w-full box-border overflow-hidden">
+                                    <div v-for="(h, i) in [12, 20, 28, 15, 24, 18, 32, 22, 12, 18, 26, 14, 20, 16, 24, 12]" :key="i" class="flex-grow bg-editorial-accent/30 rounded-full waveform-bar h-full" :class="{ 'playing': isVoicePlaying }" :style="{ height: h + 'px', animationDelay: (i * 0.05) + 's' }"></div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
-                        <!-- Right: Detailed Content -->
-                        <div class="flex flex-col gap-12">
-                            <section>
-                                <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-4 uppercase">Identity Record</div>
-                                <h1 class="text-6xl md:text-8xl font-serif font-bold tracking-tight leading-none mb-4 uppercase">{{ selectedCharacter.name }}</h1>
-                                <p class="text-2xl md:text-3xl text-editorial-accent/60 font-serif italic">{{ selectedCharacter.nameJp }}</p>
-                            </section>
-
-                            <section class="border-t border-white/5 pt-12">
-                                <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Background Narrative</div>
-                                <div class="prose prose-invert max-w-none">
-                                    <p class="text-lg md:text-xl text-editorial-text/90 leading-relaxed font-sans text-justify">
-                                        {{ selectedCharacter.description }}
-                                    </p>
-                                    <p class="mt-8 text-editorial-dim leading-relaxed">
-                                        在星辰教团的古老记载中，{{ selectedCharacter.name }} 的存在始终是一个谜。作为 {{ selectedCharacter.title }}，其力量源泉来自于宇宙最深处的共鸣。
-                                        每一次呼吸都仿佛在与虚空对话，每一次行动都牵动着命运的经纬。
-                                    </p>
-                                </div>
-                            </section>
-
-                            <section class="border-t border-white/5 pt-12">
-                                <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Voice Resonance</div>
-                                <div class="bg-white/5 rounded-2xl p-8 border border-white/5">
-                                    <div class="flex items-center gap-6 mb-6">
-                                        <button @click="playVoice" :disabled="isVoicePlaying" class="w-14 h-14 rounded-full bg-editorial-accent text-editorial-bg flex items-center justify-center hover:scale-105 transition-transform">
-                                            <i v-if="!isVoicePlaying" data-lucide="play" class="w-6 h-6 fill-current ml-1"></i>
-                                            <div v-else class="flex gap-1 items-center h-5">
-                                                <div v-for="i in 3" :key="i" class="w-1.5 bg-editorial-bg rounded-full voice-bar" :style="{ animationDelay: (i * 0.1) + 's' }"></div>
-                                            </div>
-                                        </button>
-                                        <div>
-                                            <div class="text-[10px] font-bold tracking-widest text-editorial-accent uppercase mb-1">Archive Audio</div>
-                                            <div class="text-sm italic text-editorial-dim">"{{ selectedCharacter.voiceLine }}"</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-1 h-8 px-4 bg-black/20 rounded-lg">
-                                        <div v-for="(h, i) in [12, 20, 28, 15, 24, 18, 32, 22, 12, 18, 26, 14, 20]" :key="i" class="flex-1 bg-editorial-accent/30 rounded-full waveform-bar" :class="{ 'playing': isVoicePlaying }" :style="{ height: h + 'px', animationDelay: (i * 0.05) + 's' }"></div>
+                        <!-- Tactical Analysis -->
+                        <section class="border-t border-white/5 pt-12 pb-20 w-full">
+                            <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Tactical Analysis</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                                <div v-for="i in 4" :key="i" class="p-6 bg-white/5 border border-white/5 rounded-xl w-full box-border">
+                                    <div class="text-[9px] font-bold text-editorial-dim uppercase mb-2">Parameter 0{{i}}</div>
+                                    <div class="h-1 bg-white/10 rounded-full overflow-hidden w-full">
+                                        <div class="h-full bg-editorial-accent" :style="{ width: (40 + Math.random() * 50) + '%' }"></div>
                                     </div>
                                 </div>
-                            </section>
-
-                            <section class="border-t border-white/5 pt-12 pb-20">
-                                <div class="text-[10px] font-bold tracking-[0.4em] text-editorial-accent mb-6 uppercase">Tactical Analysis</div>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div v-for="i in 4" :key="i" class="p-6 bg-white/5 border border-white/5 rounded-xl">
-                                        <div class="text-[9px] font-bold text-editorial-dim uppercase mb-2">Parameter 0{{i}}</div>
-                                        <div class="h-1 bg-white/10 rounded-full overflow-hidden">
-                                            <div class="h-full bg-editorial-accent" :style="{ width: (40 + Math.random() * 50) + '%' }"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>
@@ -349,7 +378,7 @@
 
         createApp({
             setup() {
-                const view = ref('home'); // 'home' or 'detail'
+                const view = ref('home'); 
                 const selectedId = ref('1');
                 const isVoicePlaying = ref(false);
                 const characters = ref(CHARACTERS);
