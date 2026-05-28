@@ -165,7 +165,7 @@
                 <div :key="selectedCharacter.id" class="absolute inset-0">
                     <div class="absolute inset-0 bg-gradient-to-r from-editorial-bg via-editorial-bg/30 md:via-transparent to-transparent z-10"></div>
                     <img 
-                        :src="selectedCharacter.portrait" 
+                        :src="`http://152.136.27.43/${selectedCharacter.portrait}`" 
                         :alt="selectedCharacter.name" 
                         referrerpolicy="no-referrer" 
                         class="w-full h-full object-cover fullscreen-portrait-mask  md:opacity-85" 
@@ -215,7 +215,7 @@
                         <transition name="fade-slide" mode="out-in">
                             <div :key="selectedCharacter.id" class="relative">
                                 <div class="absolute -top-10 -left-4 font-serif text-[60px] md:text-[100px] italic text-editorial-accent/5 leading-none select-none">
-                                    {{ selectedCharacter.id.padStart(2, '0') }}
+                                   {{ selectedCharacter.id?.toString().padStart(2, '0') }}
                                 </div>
                                 
                                 <div class="mb-6 relative z-10">
@@ -295,12 +295,12 @@
                         BACK TO ARCHIVE
                     </button>
                     <div class="text-[10px] font-serif italic text-editorial-dim">
-                        Profile #{{ selectedCharacter.id.padStart(2, '0') }} / {{ selectedCharacter.name }}
+                        Profile #{{ selectedCharacter.id?.toString().padStart(2, '0') }}/ {{ selectedCharacter.name }}
                     </div>
                 </nav>
 
                 <div class="absolute top-24 right-0 w-full lg:w-[100vw] h-[calc(100vh-6rem)] pointer-events-none overflow-hidden">
-                    <img :src="selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover object-right-top detail-portrait-mask opacity-30 lg:opacity-50" />
+                    <img :src="'http://152.136.27.43/' + selectedCharacter.portrait" :alt="selectedCharacter.name" referrerpolicy="no-referrer" class="w-full h-full object-cover object-right-top detail-portrait-mask opacity-30 lg:opacity-50" />
                     <div class="absolute inset-0 bg-gradient-to-r from-editorial-bg via-transparent to-transparent z-10"></div>
                 </div>
 
@@ -357,7 +357,7 @@
                                 <div v-for="i in 4" :key="i" class="p-6 bg-white/5 border border-white/5 rounded-xl w-full box-border">
                                     <div class="text-[9px] font-bold text-editorial-dim uppercase mb-2">Parameter 0{{i}}</div>
                                     <div class="h-1 bg-white/10 rounded-full overflow-hidden w-full">
-                                        <div class="h-full bg-editorial-accent" :style="{ width: selectedCharacter.progress[i-1]}"></div>
+                                        <div class="h-full bg-editorial-accent"  :style="{ width: selectedCharacter.progress[i] + '%' }"></div>
                                     </div>
                                 </div>
                             </div>
@@ -369,85 +369,121 @@
     </div>
 
     <script>
-        const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+		const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+		// API 基础地址
+		const API_BASE = 'http://152.136.27.43:3000';
 
-        const CHARACTERS = [
-            { id: '1', name: '白山北', nameJp: 'チン エン', title: '潮光', description: '团长：描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/gugu.jpg', voiceLine: 'Can you hear it? The wind is singing a new song today...', color: '#3b82f6', traits: ['Gentle', 'Free-spirited', 'Musical'],progress:['80%','40%','60%','20%'] ,poem:'山衔北郭风初定，歌随鹤唳云中来'},
-            { id: '2', name: '月白白', nameJp: 'ツキ・シロ', title: '素问', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/baibai.jpg', voiceLine: 'My blade is yours, as long as your heart remains true.', color: '#ef4444', traits: ['Stoic', 'Loyal', 'Powerful'] ,progress:['80%','40%','60%','20%'] },
-            { id: '3', name: '夏销雪', nameJp: 'ナツ・ケユキ', title: '龙吟', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/xiaxia.jpg', voiceLine: 'The stars have told me much about you, traveler.', color: '#8b5cf6', traits: ['Mysterious', 'Wise', 'Dreamy'] ,progress:['80%','40%','60%','20%'] },
-            { id: '4', name: '玖玥珩', nameJp: 'ク・ユエ・コウ', title: '鸿音', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/jiujiu.jpg', voiceLine: 'Don\'t blink. You might miss the end of your story.', color: '#1f2937', traits: ['Cunning', 'Lone Wolf', 'Agile'] ,progress:['80%','40%','60%','20%'] },
-            { id: '5', name: '鲨辣辣', nameJp: 'シャ・ララ', title: '神相', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/shasha.jpg', voiceLine: 'May the moon\'s light guide your path through the darkness.', color: '#94a3b8', traits: ['Compassionate', 'Serene', 'Healer'] ,progress:['80%','40%','60%','20%'] },
-            { id: '6', name: '利威尔', nameJp: 'リ・ウェイアル', title: '九灵', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/li.png', voiceLine: 'Everything has a price. Are you willing to pay it?', color: '#f97316', traits: ['Brilliant', 'Volatile', 'Ambitious'],progress:['80%','40%','60%','20%']  },
-            { id: '7', name: '尉云舒', nameJp: 'イ・ウンショ', title: '血河', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: 'https://picsum.photos/seed/seraphina/800/1200', voiceLine: 'I have seen the heavens fall. Earth is... quieter.', color: '#fbbf24', traits: ['Melancholy', 'Noble', 'Resilient'] ,progress:['80%','40%','60%','20%'] },
-            { id: '8', name: '林愫', nameJp: 'リン・ソ', title: '沧澜', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/linlin.jpg', voiceLine: 'A single verse can change the world. Or end it.', color: '#7c3aed', traits: ['Creative', 'Fragile', 'Deep'] ,progress:['80%','40%','60%','20%'] },
-            { id: '9', name: '余捃', nameJp: 'ヨ・クン', title: '玄机', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/yu.jpg', voiceLine: 'Just a little more oil and this will be perfect!', color: '#06b6d4', traits: ['Energetic', 'Inventive', 'Optimistic'],progress:['80%','40%','60%','20%']  },
-            { id: '10', name: '冬鸣', nameJp: 'フユ・ナル', title: '龙吟', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: 'https://picsum.photos/seed/valerius/800/1200', voiceLine: 'Kneel, or be crushed. The choice is yours.', color: '#451a03', traits: ['Ruthless', 'Commanding', 'Strong'],progress:['80%','40%','60%','20%']  },
-            { id: '11', name: '氛围', nameJp: 'フンイ', title: '碎梦', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: 'https://picsum.photos/seed/luna/800/1200', voiceLine: 'Catch me if you can! But I doubt you will.', color: '#312e81', traits: ['Playful', 'Elusive', 'Clever'],progress:['80%','40%','60%','20%']  },
-            { id: '12', name: '蛋黄', nameJp: 'タン・ファン', title: '鸿音', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: 'https://picsum.photos/seed/solas/800/1200', voiceLine: 'The sun shines on all of us. Let us make the most of it.', color: '#f59e0b', traits: ['Benevolent', 'Radiant', 'Wise'],progress:['80%','40%','60%','20%']  },
-            { id: '13', name: '镜花水月', nameJp: 'キョウカ・スイゲツ', title: '龙吟', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: './img/jing.jpg', voiceLine: 'What is this... "love" you speak of? It seems inefficient.', color: '#000000', traits: ['Curious', 'Alien', 'Analytical'],progress:['80%','40%','60%','20%']  },
-            { id: '14', name: '萧暮星', nameJp: 'ショウ・ボセイ', title: '沧澜', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: 'https://picsum.photos/seed/freya/800/1200', voiceLine: 'Honor is earned in blood. Show me yours.', color: '#991b1b', traits: ['Fierce', 'Noble', 'Determined'] ,progress:['80%','40%','60%','20%'] },
-            { id: '15', name: '冷酷小风', nameJp: 'レイコ・コカゼ', title: '玄机', description: '描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述', portrait: 'https://picsum.photos/seed/zephyr/800/1200', voiceLine: 'The lightning is calling! Let\'s go!', color: '#0ea5e9', traits: ['Reckless', 'Adventurous', 'Brave'] ,progress:['80%','40%','60%','20%'] }
-        ];
+createApp({
+    setup() {
+        const view = ref('home'); 
+        const selectedId = ref('1');
+        const isVoicePlaying = ref(false);
+        const characters = ref([]);  // 改为空数组，从 API 填充
+        const searchQuery = ref('');
+        const isLoading = ref(true);  // 加载状态
+        const error = ref(null);      // 错误状态
 
-        createApp({
-            setup() {
-                const view = ref('home'); 
-                const selectedId = ref('1');
-                const isVoicePlaying = ref(false);
-                const characters = ref(CHARACTERS);
-                const searchQuery = ref('');
 
-                const selectedCharacter = computed(() => {
-                    return characters.value.find(c => c.id === selectedId.value) || characters.value[0];
-                });
-
-                const filteredCharacters = computed(() => {
-                    if (!searchQuery.value) return [];
-                    const q = searchQuery.value.toLowerCase();
-                    return characters.value.filter(c => 
-                        c.name.toLowerCase().includes(q) || 
-                        c.nameJp.toLowerCase().includes(q) ||
-                        c.id === q
-                    ).slice(0, 5);
-                });
-
-                const selectFromSearch = (id) => {
-                    selectedId.value = id;
-                    searchQuery.value = '';
-                };
-
-                let voiceTimer = null;
-                const playVoice = () => {
-                    isVoicePlaying.value = true;
-                    if (voiceTimer) clearTimeout(voiceTimer);
-                    voiceTimer = setTimeout(() => {
-                        isVoicePlaying.value = false;
-                    }, 4000);
-                };
-
-                onMounted(() => {
-                    lucide.createIcons();
-                });
-
-                watch([selectedId, view], () => {
-                    nextTick(() => {
-                        lucide.createIcons();
-                    });
-                });
-
-                return {
-                    view,
-                    selectedId,
-                    isVoicePlaying,
-                    characters,
-                    selectedCharacter,
-                    searchQuery,
-                    filteredCharacters,
-                    selectFromSearch,
-                    playVoice
-                };
+        // 从 API 获取角色数据
+        const fetchCharacters = async () => {
+            try {
+                isLoading.value = true;
+                error.value = null;
+                
+                const response = await fetch(`${API_BASE}/api/users`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && Array.isArray(result.data)) {
+                    // 将数据库字段映射到前端需要的格式
+                    characters.value = result.data.map(item => ({
+                        id: item.id.toString(),
+                        name: item.name,
+                        nameJp: item.nameJp || '',
+                        title: item.title || '',
+                        description: item.description || '',
+                        portrait: item.portrait || './img/default.jpg',
+                        voiceLine: item.voiceLine || '',
+                        color: item.color || '#3b82f6',
+                        traits: item.traits ? (typeof item.traits === 'string' ? JSON.parse(item.traits) : item.traits) : [],
+                        progress: item.progress ? (typeof item.progress === 'string' ? JSON.parse(item.progress) : item.progress) : ['80%', '40%', '60%', '20%'],
+                        poem: item.poem || ''
+                    }));
+                    
+                    // 如果有数据，默认选中第一个
+                    if (characters.value.length > 0) {
+                        selectedId.value = characters.value[0].id;
+                    }
+                } else {
+                    throw new Error('Invalid data format from API');
+                }
+            } catch (err) {
+                console.error('Failed to fetch characters:', err);
+                error.value = err.message;
+                // 加载失败时使用空数组，避免页面报错
+                characters.value = [];
+            } finally {
+                isLoading.value = false;
             }
-        }).mount('#app');
+        };
+
+        const selectedCharacter = computed(() => {
+            return characters.value.find(c => c.id === selectedId.value) || characters.value[0] || {};
+        });
+
+        const filteredCharacters = computed(() => {
+            if (!searchQuery.value) return [];
+            const q = searchQuery.value.toLowerCase();
+            return characters.value.filter(c => 
+                (c.name && c.name.toLowerCase().includes(q)) || 
+                (c.nameJp && c.nameJp.toLowerCase().includes(q)) ||
+                c.id === q
+            ).slice(0, 5);
+        });
+
+        const selectFromSearch = (id) => {
+            selectedId.value = id;
+            searchQuery.value = '';
+        };
+
+        let voiceTimer = null;
+        const playVoice = () => {
+            isVoicePlaying.value = true;
+            if (voiceTimer) clearTimeout(voiceTimer);
+            voiceTimer = setTimeout(() => {
+                isVoicePlaying.value = false;
+            }, 4000);
+        };
+
+        onMounted(() => {
+            fetchCharacters();  // 页面加载时获取数据
+            lucide.createIcons();
+        });
+
+        watch([selectedId, view], () => {
+            nextTick(() => {
+                lucide.createIcons();
+            });
+        });
+
+        return {
+            view,
+            selectedId,
+            isVoicePlaying,
+            characters,
+            selectedCharacter,
+            searchQuery,
+            filteredCharacters,
+            selectFromSearch,
+            playVoice,
+            isLoading,
+            error
+        };
+    }
+}).mount('#app');
     </script>
 </body>
 </html>
