@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>笨蛋受害者联盟 · 资料库</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: #f3f6fc;  /* 柔和浅蓝灰基底，干净有层次 */
+      color: #1a2c3e;
+      line-height: 1.4;
+    }
+
+    /* 装饰性网格背景（极浅）*/
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(#cbd5e1 0.8px, transparent 0.8px);
+      background-size: 28px 28px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 28px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* 头部卡片 - 轻盈毛玻璃 */
+    .header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 2rem;
+      padding: 24px 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(156, 180, 204, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(125deg, #2c3e66, #4f6f8f);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #5b6e8c;
+      font-size: 0.9rem;
+      font-weight: 450;
+      border-top: 1px solid #e2edf7;
+      display: inline-block;
+      width: auto;
+      margin: 0 auto;
+      padding-top: 10px;
+    }
+
+    /* 工具栏 */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 14px;
+      background: white;
+      padding: 12px 24px;
+      border-radius: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+      border: 1px solid #eef3fc;
+    }
+
+    /* 按钮体系 - 柔和设计感 */
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f0f4f9;
+      color: #2c3e66;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.02);
+    }
+
+    .btn-primary {
+      background: #eef2ff;
+      color: #2c3e66;
+      border: 1px solid #cdddf5;
+    }
+    .btn-primary:hover {
+      background: #e2eaff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px -8px rgba(44,62,102,0.2);
+      border-color: #b7cbee;
+    }
+
+    .btn-success {
+      background: #e1f7ea;
+      color: #1e6f3f;
+      border: 1px solid #c0e0cf;
+    }
+    .btn-success:hover {
+      background: #cdecdb;
+      transform: translateY(-1px);
+    }
+
+    .btn-warning {
+      background: #fff1e0;
+      color: #b45f2b;
+      border: 1px solid #ffe0bf;
+    }
+    .btn-warning:hover {
+      background: #ffe6cf;
+    }
+
+    .btn-danger {
+      background: #fee9e9;
+      color: #bc5a5a;
+      border: 1px solid #fad1d1;
+    }
+    .btn-danger:hover {
+      background: #fcdddd;
+    }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #4a627a;
+      border: 1px solid #dfe8f0;
+    }
+
+    /* 表格设计：干净轻薄 */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 1.5rem;
+      background: white;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), 0 0 0 1px #ecf3fa;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 16px 18px;
+      background: #fafdff;
+      color: #2c4c6e;
+      font-weight: 600;
+      border-bottom: 1.5px solid #e6f0f8;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+    }
+
+    td {
+      padding: 16px 18px;
+      border-bottom: 1px solid #f0f5fb;
+      vertical-align: middle;
+      color: #2e405b;
+    }
+
+    tr {
+      transition: background 0.2s;
+    }
+    tr:hover {
+      background: #fafcff;
+    }
+
+    /* 颜色预览小圆块 */
+    .color-swatch {
+      width: 36px;
+      height: 36px;
+      border-radius: 14px;
+      border: 1.5px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 0 0 1px #e2edf5;
+      transition: transform 0.1s ease;
+    }
+
+    /* 特性标签 */
+    .traits-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .trait-tag {
+      background: #ecf3fa;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #346792;
+      letter-spacing: 0.2px;
+    }
+
+    /* 进度条 */
+    .progress-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      width: 100px;
+      height: 6px;
+      background: #e4ecf3;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6c9ebf, #3f7eac);
+      border-radius: 12px;
+      width: 0%;
+    }
+    .progress-text {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #4a6f8f;
+    }
+
+    /* 模态框——柔光设计 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(35, 45, 60, 0.5);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      background: #ffffff;
+      border-radius: 2rem;
+      width: 90%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px 30px;
+      box-shadow: 0 30px 40px -20px rgba(0, 0, 0, 0.25);
+      border: 1px solid #eef3fd;
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(18px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal h2 {
+      font-size: 1.65rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #1e2f44;
+      letter-spacing: -0.2px;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #3c5b7c;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e6edf5;
+      border-radius: 1.2rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: #ffffff;
+      transition: all 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #8ab3cf;
+      box-shadow: 0 0 0 3px rgba(106, 147, 187, 0.1);
+    }
+
+    /* 颜色选择器区块 */
+    .color-picker-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .color-text-input {
+      flex: 2;
+    }
+    .color-preview-block {
+      width: 48px;
+      height: 48px;
+      border-radius: 1rem;
+      border: 2px solid white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05), 0 0 0 1px #dee9f2;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .color-preview-block:hover {
+      transform: scale(1.02);
+    }
+    input.native-color-picker {
+      width: 48px;
+      height: 48px;
+      border: 1px solid #dfe9f2;
+      border-radius: 1rem;
+      cursor: pointer;
+      background: white;
+      padding: 2px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .loading, .error, .empty {
+      text-align: center;
+      padding: 60px 24px;
+      background: #ffffffcc;
+      backdrop-filter: blur(4px);
+      border-radius: 2rem;
+      margin-top: 20px;
+      color: #5a6e86;
+      font-weight: 500;
+    }
+
+    .error {
+      color: #bf6f6f;
+    }
+
+    small {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.7rem;
+      color: #7d95ae;
+    }
+
+    /* 表格内角色名称加粗 */
+    td strong {
+      font-weight: 600;
+      color: #1d3f5c;
+    }
+
+    /* 响应式 */
+    @media (max-width: 760px) {
+      .container {
+        padding: 16px;
+      }
+      th, td {
+        padding: 10px 12px;
+      }
+      .btn {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+      }
+      .modal {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+    <!-- 头部区域 更具设计感 -->
+    <div class="header">
+      <h1>🎭 笨蛋受害者联盟 · 资料库</h1>
+      <div style="text-align: center; margin-top: 6px;">
+        <span class="subtitle">✦ 角色编写 ✦ </span>
+      </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+      <div>
+        <button class="btn btn-primary" @click="fetchUsers">
+          <span>🔄</span> 刷新
+        </button>
+      </div>
+      <button class="btn btn-success" @click="openAddModal">
+        <span>✚</span> 增加
+      </button>
+    </div>
+
+    <!-- 内容区 -->
+    <div v-if="isLoading" class="loading">
+      <span>✨ 加载中，稍候片刻 ✨</span>
+    </div>
+    <div v-else-if="error" class="error">{{ error }}</div>
+    <div v-else-if="users.length === 0" class="empty">
+      🍃 尚无角色，点击「增加新角色」增添羁绊吧
+    </div>
+    <div v-else class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>名号</th><th>日文名</th><th>职业</th><th>颜色</th><th>特质</th><th>数值</th><th>语音摘录</th><th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in users" :key="user.id">
+            <td style="font-weight: 500;">{{ user.id }}</td>
+            <td><strong>{{ user.name }}</strong></td>
+            <td>{{ user.nameJp || '—' }}</td>
+            <td>{{ user.title || '—' }}</td>
+            <td>
+              <div class="color-swatch" :style="{ backgroundColor: user.color || '#cbdbe6' }" :title="user.color"></div>
+            </td>
+            <td>
+              <div class="traits-container">
+                <span v-for="(t, idx) in user.traits" :key="idx" class="trait-tag">{{ t }}</span>
+                <span v-if="!user.traits || user.traits.length === 0" style="color:#9aaebf;">—</span>
+              </div>
+            </td>
+            <td>
+              <div v-if="user.progress && user.progress.length">
+                <div v-for="(p, idx2) in user.progress.slice(0, 2)" :key="idx2" class="progress-item">
+                  <div class="progress-bar-bg"><div class="progress-fill" :style="{ width: p + '%' }"></div></div>
+                  <span class="progress-text">{{ p }}%</span>
+                </div>
+                <div v-if="user.progress.length > 2" style="font-size:0.65rem; color:#7d95ae;">+{{ user.progress.length-2 }}项</div>
+              </div>
+              <span v-else class="progress-text">—</span>
+            </td>
+            <td style="max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              {{ user.voiceLine ? (user.voiceLine.length > 18 ? user.voiceLine.slice(0,18)+'…' : user.voiceLine) : '——' }}
+            </td>
+            <td class="actions" style="display: flex; gap: 8px;">
+              <button class="btn btn-warning" @click="openEditModal(user)">✎ 修改</button>
+              <button class="btn btn-danger" @click="deleteUser(user.id)">✕ 删除</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 模态窗 : 新增/编辑角色 -->
+  <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+    <div class="modal">
+      <h2>{{ isEditing ? '✎ 编修角色' : '✧ 篆刻新角色' }}</h2>
+      <div class="form-group">
+        <label>名称 *</label>
+        <input v-model="form.name" placeholder="例：白山北" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>日文名 (nameJp)</label>
+        <input v-model="form.nameJp" placeholder="例：チン エン">
+      </div>
+      <div class="form-group">
+        <label>职业</label>
+        <input v-model="form.title" placeholder="例：潮光">
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea v-model="form.description" rows="2" placeholder="寥寥数语勾勒性格"></textarea>
+      </div>
+      <div class="form-group">
+        <label>诗句</label>
+        <input v-model="form.poem" placeholder="山衔北郭风初定，歌随鹤唳云中来">
+      </div>
+      <!-- 颜色区域 带选色器 -->
+      <div class="form-group">
+        <label>颜色</label>
+        <div class="color-picker-area">
+          <div class="color-text-input">
+            <input v-model="form.color" type="text" placeholder="#3b82f6">
+          </div>
+          <div class="color-preview-block" :style="{ backgroundColor: form.color }" @click="triggerColorPicker"></div>
+          <input type="color" ref="colorPickerInput" v-model="form.color" style="visibility: hidden; position: absolute; width: 0; height: 0;" @change="syncColorFromPicker">
+          <button type="button" class="btn btn-secondary" style="padding: 8px 12px;" @click="triggerColorPicker">🎨 选色盘</button>
+        </div>
+        <small>支持HEX色值，点击色块或按钮唤起系统选色器</small>
+      </div>
+      <div class="form-group">
+        <label>立绘路径</label>
+        <input v-model="form.portrait" placeholder="./img/gugu.jpg 或 /portrait/xxx.png">
+      </div>
+      <div class="form-group">
+        <label>数值</label>
+        <input v-model="progressInput" placeholder='[80, 60, 20, 90]'>
+        <small>例: [80,60,20,90] </small>
+      </div>
+      <div class="form-group">
+        <label>标签</label>
+        <input v-model="traitsInput" placeholder='["笨蛋","可爱","傲娇"]'>
+        <small>JSON数组格式，如 ["温柔","天然"]</small>
+      </div>
+      <div class="form-group">
+        <label>语音</label>
+        <textarea v-model="form.voiceLine" rows="2" placeholder="那么我要开始倒计时了……"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" @click="closeModal">取 消</button>
+        <button class="btn btn-primary" @click="saveUser">✧ 保 存 ✧</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const { createApp, ref, computed } = Vue;
+  const API_BASE = 'http://152.136.27.43:3000';
+
+  createApp({
+    setup() {
+      const users = ref([]);
+      const isLoading = ref(false);
+      const error = ref('');
+      const showModal = ref(false);
+      const isEditing = ref(false);
+      const editingId = ref(null);
+      const colorPickerInput = ref(null);
+
+      // 基础角色表单结构 (匹配后端字段)
+      const defaultForm = {
+        name: '',
+        nameJp: '',
+        title: '',
+        description: '',
+        poem: '',
+        color: '#3b82f6',
+        portrait: '',
+        progress: [],
+        traits: [],
+        voiceLine: ''
+      };
+      const form = ref({ ...defaultForm });
+
+      // 辅助: progress & traits 的JSON输入绑定
+      const progressInput = computed({
+        get: () => {
+          const prog = form.value.progress;
+          if (!prog || prog.length === 0) return '';
+          return JSON.stringify(prog);
+        },
+        set: (val) => {
+          if (!val || val.trim() === '') {
+            form.value.progress = [];
+            return;
+          }
+          try {
+            const parsed = JSON.parse(val);
+            form.value.progress = Array.isArray(parsed) ? parsed : [];
+          } catch(e) {
+            form.value.progress = [];
+          }
+        }
+      });
+
+      const traitsInput = computed({
+        get: () => {
+          const traitsArr = form.value.traits;
+          if (!traitsArr || traitsArr.length === 0) return '';
+          return JSON.stringify(traitsArr);
+        },
+        set: (val) => {
+          if (!val || val.trim() === '') {
+            form.value.traits = [];
+            return;
+          }
+          try {
+            const parsed = JSON.parse(val);
+            form.value.traits = Array.isArray(parsed) ? parsed : [];
+          } catch(e) {
+            form.value.traits = [];
+          }
+        }
+      });
+
+      // 唤起原生颜色选择器
+      const triggerColorPicker = () => {
+        if (colorPickerInput.value) {
+          colorPickerInput.value.click();
+        }
+      };
+      const syncColorFromPicker = (e) => {
+        // 由原生color选择后自动更新v-model，无需额外操作
+        if (e && e.target) {
+          form.value.color = e.target.value;
+        }
+      };
+
+      // 获取所有角色
+      async function fetchUsers() {
+        isLoading.value = true;
+        error.value = '';
+        try {
+          const res = await fetch(`${API_BASE}/api/users`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          users.value = Array.isArray(data) ? data : (data.data || []);
+        } catch (err) {
+          error.value = '数据获取失败: ' + err.message;
+          console.error(err);
+        } finally {
+          isLoading.value = false;
+        }
+      }
+
+      function openAddModal() {
+        isEditing.value = false;
+        editingId.value = null;
+        form.value = { ...defaultForm, progress: [], traits: [], color: '#3b82f6' };
+        showModal.value = true;
+      }
+
+      function openEditModal(user) {
+        isEditing.value = true;
+        editingId.value = user.id;
+        form.value = {
+          name: user.name || '',
+          nameJp: user.nameJp || '',
+          title: user.title || '',
+          description: user.description || '',
+          poem: user.poem || '',
+          color: user.color || '#3b82f6',
+          portrait: user.portrait || '',
+          progress: Array.isArray(user.progress) ? [...user.progress] : [],
+          traits: Array.isArray(user.traits) ? [...user.traits] : [],
+          voiceLine: user.voiceLine || ''
+        };
+        showModal.value = true;
+      }
+
+      function closeModal() {
+        showModal.value = false;
+      }
+
+      // 保存角色 (适配后端需要的结构: 之前代码包裹 { b: data } 或直接data，这里先尝试带b)
+      async function saveUser() {
+        if (!form.value.name || form.value.name.trim() === '') {
+          alert('名号不可为空！');
+          return;
+        }
+
+        // 清洗数据: 确保数组是数组，无undefined
+        const cleanData = {
+          name: form.value.name.trim(),
+          nameJp: form.value.nameJp || '',
+          title: form.value.title || '',
+          description: form.value.description || '',
+          poem: form.value.poem || '',
+          color: form.value.color || '#3b82f6',
+          portrait: form.value.portrait || '',
+          progress: Array.isArray(form.value.progress) ? form.value.progress : [],
+          traits: Array.isArray(form.value.traits) ? form.value.traits : [],
+          voiceLine: form.value.voiceLine || ''
+        };
+
+        // 策略： 按照之前错误排查，后端或许需要 { b: data } 格式（从早期代码中保留），同时也做降级
+        const payload = { b: cleanData };
+        const url = isEditing.value ? `${API_BASE}/api/users/${editingId.value}` : `${API_BASE}/api/users`;
+        const method = isEditing.value ? 'PUT' : 'POST';
+
+        console.log('[Save] Sending wrapped payload:', payload);
+
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(errText || `请求失败 ${res.status}`);
+          }
+          const result = await res.json();
+          console.log('保存成功', result);
+          closeModal();
+          await fetchUsers();
+          alert(isEditing.value ? '角色资料已更新 🌟' : '新角色已录入星图 ✨');
+        } catch (err) {
+          console.warn('带b包装失败，尝试直接发送对象', err);
+          // 降级: 直接发送 cleanData
+          try {
+            const res2 = await fetch(url, {
+              method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(cleanData)
+            });
+            if (!res2.ok) {
+              const errText2 = await res2.text();
+              throw new Error(errText2);
+            }
+            const result2 = await res2.json();
+            console.log('降级保存成功', result2);
+            closeModal();
+            await fetchUsers();
+            alert(isEditing.value ? '角色更新完成 🎐' : '新增角色成功 🎉');
+          } catch (err2) {
+            console.error('保存彻底失败', err2);
+            alert(`保存失败: ${err2.message || '未知错误'}`);
+          }
+        }
+      }
+
+      async function deleteUser(id) {
+        if (!confirm('确定要消除这个角色吗？数据将化为虚无……')) return;
+        try {
+          const res = await fetch(`${API_BASE}/api/users/${id}`, { method: 'DELETE' });
+          if (!res.ok) {
+            const errMsg = await res.text();
+            throw new Error(errMsg);
+          }
+          await fetchUsers();
+          alert('角色已佚失 🍂');
+        } catch (err) {
+          alert(`删除失败: ${err.message}`);
+        }
+      }
+
+      fetchUsers();
+
+      return {
+        users,
+        isLoading,
+        error,
+        showModal,
+        isEditing,
+        form,
+        progressInput,
+        traitsInput,
+        colorPickerInput,
+        triggerColorPicker,
+        syncColorFromPicker,
+        fetchUsers,
+        openAddModal,
+        openEditModal,
+        closeModal,
+        saveUser,
+        deleteUser
+      };
+    }
+  }).mount('#app');
+</script>
+</body>
+</html>
